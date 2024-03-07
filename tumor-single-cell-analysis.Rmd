@@ -35,7 +35,7 @@ The `Read10X()` function is used to read in the data matricies. If you run into 
 
 ```{r}
 # Read in data
-raw_data <- Read10X(data.dir = "raw_data/haining")
+raw_data <- Read10X(data.dir = "./GSE110746")
 ```
 
 Once the raw data is read in, you can create a Seurat object using the function `CreateSeuratObject()`.
@@ -74,8 +74,8 @@ We can add columns to the `@meta.data` section by using `[[ ]]`. Below, we use r
 
 ```{r eval=F}
 # check whether you are getting the genes you want
-grep("^mt-", rownames(b16@assays$RNA@data), value = T)
-grep("Rps|Rpl|Mrpl|Mrps", rownames(b16@assays$RNA@data), value = T)
+grep("^mt-", rownames(b16@assays$RNA), value = T)
+grep("Rps|Rpl|Mrpl|Mrps", rownames(b16@assays$RNA), value = T)
 ```
 
 ```{r percent-mito-ribo-nfeature-graphs, fig.width=10, fig.height=3}
@@ -112,9 +112,12 @@ Now that we have created the Seurat object and performed some initial filtering 
 b16 <- NormalizeData(b16, normalization.method = "LogNormalize", scale.factor = 10000)
 b16 <- FindVariableFeatures(b16, selection.method = "vst", nfeatures = 2000)
 all.genes <- rownames(b16)
-plan("multiprocess", workers = 4)
+```
+
+```{r eval=F}
+plan("multisession", workers = 4)
 b16 <- ScaleData(b16, features = all.genes, vars.to.regress = c("nCount_RNA", "percent.mito", "percent.ribo"))
-plan("multiprocess", workers = 1)
+plan("multisession", workers = 1)
 ```
 
 ```{r include = F}
